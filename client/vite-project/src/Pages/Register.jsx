@@ -1,29 +1,25 @@
 import React from "react";
 import { Button, Form, Input } from "antd";
-import {Link} from 'react-router-dom'
-import "./auth.css";  // Importing CSS for consistency
-import { RegisterUser } from "../apiCalls/users";
-
+import { Link } from "react-router-dom";
+import "./auth.css";
 
 function Register() {
-
-  const registerData = async(values)=>{
-    const response = await RegisterUser(values)
-    console.log(response)
-
-  }
+  const onFinish = (values) => {
+    console.log("Registration form submitted:", values);
+    alert("Registration successful!");
+  };
 
   return (
-    <div className="auth-container" >
+    <div className="auth-container">
       <div className="auth-box">
-        <h1 className="title">Register for MovieBook</h1>
-        <Form layout="vertical" onFinish={registerData}>
+        <h1 className="title">Register for Shantha Motors</h1>
+        <Form layout="vertical" onFinish={onFinish}>
           <Form.Item
             label="Name"
             name="name"
             rules={[{ required: true, message: "Name is required" }]}
           >
-            <Input type="text" placeholder="Enter your name" className="input-field"/>
+            <Input placeholder="Enter your name" className="input-field" />
           </Form.Item>
 
           <Form.Item
@@ -31,7 +27,7 @@ function Register() {
             name="email"
             rules={[{ required: true, message: "Email is required" }]}
           >
-            <Input type="email" placeholder="Enter your email" className="input-field"/>
+            <Input type="email" placeholder="Enter your email" className="input-field" />
           </Form.Item>
 
           <Form.Item
@@ -39,7 +35,7 @@ function Register() {
             name="password"
             rules={[{ required: true, message: "Password is required" }]}
           >
-            <Input type="password" placeholder="Enter your password" className="input-field"/>
+            <Input.Password placeholder="Enter your password" className="input-field" />
           </Form.Item>
 
           <Button type="primary" block htmlType="submit" className="auth-button">
@@ -47,7 +43,7 @@ function Register() {
           </Button>
         </Form>
         <p className="switch-text">
-          Already a user?  New User? <Link to='/login'>Login here</Link>
+          Already a user? <Link to="/login">Login here</Link>
         </p>
       </div>
     </div>
