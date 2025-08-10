@@ -6,6 +6,7 @@ import Home from "./Pages/Home";
 import BookingForm from "./Pages/BookingForm";
 import About from "./Pages/About";
 import EmiCalculator from "./Pages/EmiCalculator";
+import Contact from "./Pages/contact";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <Route path="/bookingform" element={<BookingForm />} />
       <Route path="/about" element={<About />} />
       <Route path="/emicalculator" element={<EmiCalculator />} />
+      <Route path="/contact" element={<Contact />} />
   
     </Routes>
   );

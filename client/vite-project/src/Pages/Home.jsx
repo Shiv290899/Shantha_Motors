@@ -1,32 +1,38 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { FaWhatsapp } from "react-icons/fa"; // WhatsApp icon
-
-
-/**
- * Home.jsx — Shantha Motors homepage (single-file version)
- * - Pure React + inline styles (no external CSS needed)
- * - Floating WhatsApp button
- * - Responsive 5-star fake reviews (10 cards)
- */
+import { FaWhatsapp } from "react-icons/fa";
 
 export default function Home() {
-  // Responsive columns for reviews
-  const [reviewCols, setReviewCols] = React.useState(5);
+  // ---- simple responsive hook ----
+  const useScreen = () => {
+    const [w, setW] = React.useState(typeof window !== "undefined" ? window.innerWidth : 1280);
+    React.useEffect(() => {
+      const onResize = () => setW(window.innerWidth);
+      window.addEventListener("resize", onResize);
+      return () => window.removeEventListener("resize", onResize);
+    }, []);
+    const isMobile = w <= 480;
+    const isTablet = w > 480 && w <= 1024;
+    const isDesktop = w > 1024;
+    return { w, isMobile, isTablet, isDesktop };
+  };
 
-  React.useEffect(() => {
-    const calcCols = () => {
-      const w = window.innerWidth;
-      if (w <= 480) return 1;
-      if (w <= 768) return 2;
-      if (w <= 1024) return 3;
-      return 5;
-    };
-    const onResize = () => setReviewCols(calcCols());
-    setReviewCols(calcCols());
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
+  const { isMobile, isTablet } = useScreen();
+
+  // Mobile nav state
+  const [menuOpen, setMenuOpen] = React.useState(false);
+
+  // Reviews grid columns (responsive)
+  const reviewCols = isMobile ? 1 : isTablet ? 2 : 5;
+
+  // Shared sizes
+  const containerPad = isMobile ? 12 : 16;
+  const heroHeight = isMobile ? 280 : isTablet ? 360 : 420;
+  const heroTitleSize = isMobile ? 26 : isTablet ? 34 : 40;
+  const heroSubSize = isMobile ? 14 : isTablet ? 16 : 18;
+
+  const gridCols = isMobile ? "1fr" : isTablet ? "repeat(2, 1fr)" : "repeat(3, 1fr)";
+  const aboutGrid = isMobile ? "1fr" : isTablet ? "1fr 1fr" : "1.2fr 1fr";
 
   const styles = {
     topbar: {
@@ -34,29 +40,64 @@ export default function Home() {
       color: "#333",
       fontSize: 14,
       padding: "6px 16px",
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
     },
     container: {
       maxWidth: 1200,
       margin: "0 auto",
-      padding: "0 16px",
+      padding: `0 ${containerPad}px`,
     },
     header: {
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
       padding: "12px 0",
+      position: "relative",
     },
     logoWrap: { display: "flex", alignItems: "center", gap: 12 },
-    logoImg: { height: 48, width: "auto" },
+    logoImg: { height: isMobile ? 40 : 48, width: "auto", objectFit: "contain" },
     tagline: { fontSize: 12, color: "#666" },
-    nav: { display: "flex", gap: 18, flexWrap: "wrap" },
+    nav: {
+      display: isMobile ? "none" : "flex",
+      gap: 18,
+      flexWrap: "wrap",
+      alignItems: "center",
+    },
     navLink: { textDecoration: "none", color: "#222", fontWeight: 500 },
+    burger: {
+      display: isMobile ? "flex" : "none",
+      height: 36,
+      width: 44,
+      alignItems: "center",
+      justifyContent: "center",
+      border: "1px solid #ddd",
+      borderRadius: 8,
+      background: "#fff",
+      cursor: "pointer",
+    },
+    drawer: {
+      position: "absolute",
+      top: "64px",
+      right: 0,
+      background: "#fff",
+      border: "1px solid #eee",
+      borderRadius: 12,
+      padding: 12,
+      boxShadow: "0 10px 24px rgba(0,0,0,0.08)",
+      display: menuOpen ? "block" : "none",
+      zIndex: 50,
+      minWidth: 220,
+    },
+    drawerLink: {
+      display: "block",
+      padding: "10px 12px",
+      textDecoration: "none",
+      color: "#222",
+      fontWeight: 500,
+      borderRadius: 8,
+    },
     hero: {
       position: "relative",
-      height: 420,
+      height: heroHeight,
       borderRadius: 12,
       overflow: "hidden",
       background:
@@ -67,14 +108,10 @@ export default function Home() {
       color: "white",
       textAlign: "center",
     },
-    heroOverlay: {
-      position: "absolute",
-      inset: 0,
-      background: "rgba(0,0,0,0.35)",
-    },
+    heroOverlay: { position: "absolute", inset: 0, background: "rgba(0,0,0,0.35)" },
     heroContent: { position: "relative", zIndex: 1, padding: "0 16px" },
-    heroTitle: { fontSize: 40, fontWeight: 800, margin: "6px 0" },
-    heroSub: { fontSize: 18, opacity: 0.95 },
+    heroTitle: { fontSize: heroTitleSize, fontWeight: 800, margin: "6px 0" },
+    heroSub: { fontSize: heroSubSize, opacity: 0.95, lineHeight: 1.4 },
     ctaRow: {
       marginTop: 16,
       display: "flex",
@@ -85,7 +122,7 @@ export default function Home() {
     ctaBtnPrimary: {
       background: "#e11d48",
       color: "white",
-      padding: "10px 16px",
+      padding: isMobile ? "10px 14px" : "10px 16px",
       borderRadius: 8,
       border: "none",
       cursor: "pointer",
@@ -94,7 +131,7 @@ export default function Home() {
     ctaBtn: {
       background: "white",
       color: "#111",
-      padding: "10px 16px",
+      padding: isMobile ? "10px 14px" : "10px 16px",
       borderRadius: 8,
       border: "1px solid #ddd",
       cursor: "pointer",
@@ -102,7 +139,7 @@ export default function Home() {
     },
     grid3: {
       display: "grid",
-      gridTemplateColumns: "repeat(3, 1fr)",
+      gridTemplateColumns: gridCols,
       gap: 16,
     },
     card: {
@@ -112,19 +149,29 @@ export default function Home() {
       background: "white",
       boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
     },
-    section: { padding: "32px 0" },
-    sectionTitle: { fontSize: 24, fontWeight: 800, marginBottom: 10 },
-    sectionSub: { color: "#555", marginBottom: 16 },
+    section: { padding: isMobile ? "24px 0" : "32px 0" },
+    sectionTitle: {
+      fontSize: isMobile ? 20 : 24,
+      fontWeight: 800,
+      marginBottom: 10,
+      textAlign: isMobile ? "center" : "left",
+    },
+    sectionSub: {
+      color: "#555",
+      marginBottom: 16,
+      fontSize: isMobile ? 13 : 14,
+      textAlign: isMobile ? "center" : "left",
+    },
     about: {
       display: "grid",
-      gridTemplateColumns: "1.2fr 1fr",
+      gridTemplateColumns: aboutGrid,
       gap: 18,
       alignItems: "center",
     },
     aboutImg: {
       width: "100%",
       borderRadius: 12,
-      height: 260,
+      height: isMobile ? 200 : 260,
       objectFit: "cover",
     },
     linkBtn: { color: "#e11d48", textDecoration: "none", fontWeight: 700 },
@@ -146,7 +193,6 @@ export default function Home() {
       fontSize: 12,
       letterSpacing: 0.6,
     },
-    reviewsWrap: {},
     whatsapp: {
       position: "fixed",
       right: 16,
@@ -166,24 +212,37 @@ export default function Home() {
       transition: "transform 0.2s ease, boxShadow 0.2s ease",
     },
     small: { fontSize: 12, color: "#777" },
+    phoneRow: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      gap: 8,
+      flexWrap: "wrap",
+    },
+    // Hover for desktop
+    hover: { filter: "brightness(0.95)" },
   };
+
+  const navItems = [
+    "Home",
+    "BookingForm",
+    "EMICalculator",
+    "Gallery",
+    "Contact",
+    "Login",
+  ];
 
   return (
     <div>
       {/* Topbar */}
       <div style={styles.topbar}>
         <div style={styles.container}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
+          <div style={styles.phoneRow}>
             <div>
               Sales : <strong>9731366921</strong>
             </div>
-            <div style={styles.small}>Open 9:00 AM – 8:30 PM • Mon–Sat</div>
+            <div style={styles.small}>Open 9:00 AM – 8:30 PM • Mon–Sat <span>
+              Opens 9:00 AM – 2:30 PM • Sunday</span></div>
           </div>
         </div>
       </div>
@@ -192,34 +251,25 @@ export default function Home() {
       <div style={styles.container}>
         <header style={styles.header}>
           <div style={styles.logoWrap}>
-           <img
-            src="/shantha-logo.png"
-            alt="Shantha Motors Logo"
-            style={styles.logoImg}
-          />
-
-
+            <img
+              src="/shantha-logo.png"
+              alt="Shantha Motors Logo"
+              style={styles.logoImg}
+              onError={(e) => {
+                e.currentTarget.src =
+                  "https://via.placeholder.com/200x48?text=Shantha+Motors";
+              }}
+            />
             <div>
               <div style={{ fontSize: 18, fontWeight: 800 }}>Shantha Motors</div>
               <div style={styles.tagline}>The Power of Trust</div>
             </div>
           </div>
-          <nav style={styles.nav} aria-label="Primary">
-            {[
-              "Home",
-              "Products",
-              "BookingForm",
-              "Enquiry",
-              "EMICalculator",
-              "Service",
-              "Gallery",
-              "Locations",
-              "Contact",
-              "Login",
-            ].map((item) => {
-              // Convert label to a route-friendly path (lowercase, replace spaces with "-")
-              const path = "/" + item.toLowerCase().replace(/\s+/g, "-");
 
+          {/* Desktop/Tablet nav */}
+          <nav style={styles.nav} aria-label="Primary">
+            {navItems.map((item) => {
+              const path = "/" + item.toLowerCase().replace(/\s+/g, "-");
               return (
                 <Link key={item} to={path} style={styles.navLink}>
                   {item}
@@ -228,6 +278,36 @@ export default function Home() {
             })}
           </nav>
 
+          {/* Mobile burger */}
+          <button
+            aria-label="Toggle menu"
+            style={styles.burger}
+            onClick={() => setMenuOpen((s) => !s)}
+          >
+            {/* simple burger icon */}
+            <div style={{ display: "grid", gap: 4 }}>
+              <span style={{ height: 2, width: 18, background: "#333", display: "block" }} />
+              <span style={{ height: 2, width: 18, background: "#333", display: "block" }} />
+              <span style={{ height: 2, width: 18, background: "#333", display: "block" }} />
+            </div>
+          </button>
+
+          {/* Mobile drawer */}
+          <div style={styles.drawer}>
+            {navItems.map((item) => {
+              const path = "/" + item.toLowerCase().replace(/\s+/g, "-");
+              return (
+                <Link
+                  key={item}
+                  to={path}
+                  style={styles.drawerLink}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {item}
+                </Link>
+              );
+            })}
+          </div>
         </header>
       </div>
 
@@ -264,7 +344,7 @@ export default function Home() {
         </section>
       </div>
 
-      {/* We Do / We Offer / We Prefer In */}
+      {/* We Do / Offer / Prefer */}
       <div style={styles.container}>
         <section style={styles.section} id="offerings">
           <h2 style={styles.sectionTitle}>We Do • We Offer • We Prefer In</h2>
@@ -275,7 +355,7 @@ export default function Home() {
             <div style={styles.card}>
               <h3>SALES</h3>
               <p>
-                Latest Multi-branded Two wheeler vehicle bikes and scooters with city-wise on-road prices and flexible EMI
+                Latest multi-branded bikes and scooters with city-wise on-road prices and flexible EMI
                 options.
               </p>
             </div>
@@ -306,22 +386,22 @@ export default function Home() {
 
       {/* About */}
       <div style={styles.container}>
-        <section style={{ ...styles.section, ...styles.about }} id="about">
+        <section style={{ ...styles.section, display: "grid", gridTemplateColumns: aboutGrid, gap: 18, alignItems: "center" }} id="about">
           <div>
             <h2 style={styles.sectionTitle}>About Shantha Motors</h2>
             <p style={styles.sectionSub}>
-              Founded in Aug 2022 by a visionary NITK Civil Engineer Nagesh, Shantha Motors began its journey with a single showroom in Bengaluru and a clear mission — to deliver exceptional two-wheeler sales, service, and customer experiences.
-
-From humble beginnings, we have grown rapidly:
-Year 1: 1 showroom → Year 2: 3 showrooms → Year 3: 9 showrooms → Year 4: 10 showrooms (and counting). By the end of 2025, we aim for 15 showrooms, with a long-term vision of 100+ across Karnataka, possibly even 200+.
-
-Our growth reflects a near 3x scale-up each year, driven by unwavering commitment to quality, genuine spares, transparent pricing, and friendly, expert service. We’re not just building outlets — we’re building a trusted brand recognized across Bengaluru for seamless, happy customer experiences.
-
-Whether it’s your first bike, an upgrade, or reliable servicing, our promise is simple: you’re not just a customer — you’re family.
+              Founded in Aug 2022 by a visionary NITK Civil Engineer Nagesh, Shantha Motors began its
+              journey with a single showroom in Bengaluru and a clear mission — to deliver exceptional
+              two-wheeler sales, service, and customer experiences.
+              <br /><br />
+              From humble beginnings, we have grown rapidly: Year 1: 1 showroom → Year 2: 3 → Year 3:
+              9 → Year 4: 10 (and counting). By the end of 2025, we aim for 15 showrooms, with a
+              long-term vision of 100+ across Karnataka.
+              <br /><br />
+              Whether it’s your first bike, an upgrade, or reliable servicing, our promise is simple:
+              you’re not just a customer — you’re family.
             </p>
-            <a href="/about" style={styles.linkBtn}>
-              Read More →
-            </a>
+            <a href="/about" style={styles.linkBtn}>Read More →</a>
           </div>
           <img
             style={styles.aboutImg}
@@ -331,62 +411,88 @@ Whether it’s your first bike, an upgrade, or reliable servicing, our promise i
         </section>
       </div>
 
-      {/* Google Reviews (responsive + fake 5-star) */}
+      {/* Google Reviews */}
       <div style={styles.container}>
         <section style={styles.section}>
           <h2 style={styles.sectionTitle}>Google Reviews</h2>
           <div
+  style={{
+    display: "grid",
+    gridTemplateColumns: `repeat(${reviewCols}, 1fr)`,
+    gap: 16,
+  }}
+>
+  {[
+    { name: "Aarav Sharma", rating: 5, time: "2 days ago", text: "Smooth booking process and quick delivery. Staff was very helpful throughout." },
+    { name: "Priya Nair", rating: 4.5, time: "1 week ago", text: "Good service quality, reasonable pricing. Will come back for servicing." },
+    { name: "Rohit Verma", rating: 4, time: "3 weeks ago", text: "Test ride arranged instantly, paperwork was quick and hassle-free." },
+    { name: "Ananya Iyer", rating: 5, time: "yesterday", text: "Transparent pricing and genuine accessories—very satisfied!" },
+    { name: "Vikram Rao", rating: 4.5, time: "4 days ago", text: "Service center turnaround was quick and professional." },
+    { name: "Sneha Kulkarni", rating: 4, time: "5 days ago", text: "Friendly staff, but the waiting area could be improved." },
+    { name: "Arjun Menon", rating: 5, time: "2 weeks ago", text: "Great experience from booking to delivery. Highly recommended." },
+    { name: "Meera Joshi", rating: 4.5, time: "6 days ago", text: "Prompt service and knowledgeable staff. Appreciate the quick updates." },
+    { name: "Siddharth Desai", rating: 4, time: "1 month ago", text: "Good range of bikes and fair EMI options. Satisfied overall." },
+    { name: "Kavya Reddy", rating: 5, time: "3 days ago", text: "Excellent after-sales service and polite staff." },
+  ].map((review, i) => {
+    const fullStars = Math.floor(review.rating);
+    const hasHalf = review.rating % 1 !== 0;
+    return (
+      <div
+        key={i}
+        style={{
+          border: "1px solid #eee",
+          borderRadius: 12,
+          padding: 12,
+          background: "#fff",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+          textAlign: "left",
+        }}
+      >
+        {/* Header: emoji avatar + name + time */}
+        <div style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
+          <div
             style={{
-              display: "grid",
-              gridTemplateColumns: `repeat(${reviewCols}, 1fr)`,
-              gap: 16,
+              width: 40,
+              height: 40,
+              borderRadius: "50%",
+              background: "#eee",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 20,
+              marginRight: 10,
             }}
           >
-            {Array.from({ length: 10 }).map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  border: "1px solid #eee",
-                  borderRadius: 12,
-                  padding: 12,
-                  background: "#fff",
-                  boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-                  textAlign: "left",
-                }}
-              >
-                {/* Header: avatar + name + time */}
-                <div style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
-                  <img
-                    src={`https://i.pravatar.cc/40?img=${(i % 70) + 1}`}
-                    alt="Customer avatar"
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: "50%",
-                      marginRight: 10,
-                    }}
-                  />
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: 14 }}>Customer {i + 1}</div>
-                    <div style={{ fontSize: 12, color: "#888" }}>{(i % 3) + 1} days ago</div>
-                  </div>
-                </div>
-
-                {/* Stars */}
-                <div style={{ color: "#FFD700", fontSize: 16, marginBottom: 6 }}>
-                  {"★".repeat(5)}
-                </div>
-
-                {/* Title + text */}
-                <div style={{ fontWeight: 700, color: "#222", fontSize: 13, marginBottom: 4 }}>
-                  Excellent
-                </div>
-                <div style={{ fontSize: 13, color: "#444" }}>
-                  Excellent service! Very satisfied with the bike purchase and overall experience.
-                </div>
-              </div>
-            ))}
+            👤
           </div>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 14 }}>{review.name}</div>
+            <div style={{ fontSize: 12, color: "#888" }}>{review.time}</div>
+          </div>
+        </div>
+
+        {/* Stars */}
+        <div style={{ color: "#FFD700", fontSize: 16, marginBottom: 6 }}>
+          {"★".repeat(fullStars)}
+          {hasHalf && "½"}
+          {"☆".repeat(5 - fullStars - (hasHalf ? 1 : 0))}
+          <span style={{ marginLeft: 6, color: "#555", fontSize: 12 }}>
+            {review.rating.toFixed(1)}
+          </span>
+        </div>
+
+        {/* Title + text */}
+        <div style={{ fontWeight: 700, color: "#222", fontSize: 13, marginBottom: 4 }}>
+          {review.rating >= 4.5 ? "Excellent" : "Good"}
+        </div>
+        <div style={{ fontSize: 13, color: "#444" }}>
+          {review.text}
+        </div>
+      </div>
+    );
+  })}
+</div>
+
         </section>
       </div>
 
